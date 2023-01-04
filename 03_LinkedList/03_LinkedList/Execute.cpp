@@ -1,45 +1,70 @@
+#include <iostream>
 #include "LinkedList.h"
-
-typedef LinkedList<int> List;
-
-//int main()
-//{
-//    List::Node* node = List::Create(10);
-//
-//    List* list = new List(node);
-//    list->Push(List::Create(20));
-//
-//    List::Node* temp = List::Create(30);
-//    list->Push(temp);
-//    list->Push(List::Create(5));
-//
-//    list->Print(list->Head());
-//
-//    cout << endl;
-//
-//    list->Print(temp);
-//
-//    return 0;
-//}
+using namespace std;
 
 int main()
 {
-    List::Node* node = List::Create(1);
+    Node* node = nullptr;
+    for (int i = 0; i < 5; i++)
+    {
+        Node* temp = Create(i);
+        Push(&node, temp);
+    }
 
-    List* list = new List(node);
-    list->Push(List::Create(2));
-    list->Push(List::Create(3));
-    list->Push(List::Create(4));
-    list->Push(List::Create(5));
+    Node* newNode = nullptr;
+    {
+        newNode = Create(-1);
+        InsertHead(&node, newNode);
 
-    list->Print(list->Head());
+        newNode = Create(-2);
+        InsertHead(&node, newNode);
+    }
 
-    cout << endl;
+    // Print
+    {
+        Node* current = GetNode(node, 2);
+        newNode = Create(1000);
 
-    List::Node* temp = list->GetNode(3);
-    list->Insert(temp, List::Create(10));
+        Insert(current, newNode);
 
-    list->Print(list->Head());
+        int count = GetNodeCount(node);
+        for (int i = 0; i < count; i++)
+        {
+            Node* current = GetNode(node, i);
+            cout << "List[" << i << "] : " << current->Data << endl;
+        }
+        cout << "---------------------------------------------------" << endl << endl;
+    }
+
+    // Remove
+    {
+        Node* remove = GetNode(node, 3);
+        Remove(&node, remove);
+
+        int count = GetNodeCount(node);
+        for (int i = 0; i < count; i++)
+        {
+            Node* current = GetNode(node, i);
+            cout << "List[" << i << "] : " << current->Data << endl;
+        }
+        cout << "---------------------------------------------------" << endl << endl;
+    }
+    
+    // Remove All
+    {
+        int count = GetNodeCount(node);
+
+        for (int i = 0; i < count; i++)
+        {
+            Node* current = GetNode(node, 0);
+
+            if (current != nullptr)
+            {
+                Remove(&node, current);
+                Destroy(current);
+            }
+        }
+    }
 
     return 0;
 }

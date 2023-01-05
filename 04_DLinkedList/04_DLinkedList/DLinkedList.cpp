@@ -13,10 +13,10 @@ Node* Create(DataType data)
     return node;
 }
 
-void Destroy(Node* node)
+void Destroy(Node** node)
 {
-    delete node;
-    node = nullptr;
+    delete* node;
+    *node = nullptr;
 }
 
 void Push(Node** head, Node* node)
@@ -48,56 +48,66 @@ void Insert(Node* current, Node* node)
     current->NextNode = node;
 }
 
-//void InsertHead(Node** current, Node* head)
-//{
-//    if (*current == nullptr)
-//    {
-//        *current = head;
-//    }
-//    else
-//    {
-//        head->NextNode = *current;
-//        *current = head;
-//    }
-//}
-//
-//void Remove(Node** head, Node* remove)
-//{
-//    if (*head == remove)
-//    {
-//        *head = remove->NextNode;
-//    }
-//    else
-//    {
-//        Node* current = *head;
-//        while ((current != nullptr) && (current->NextNode != remove))
-//            current = current->NextNode;
-//
-//        if (current != nullptr)
-//            current->NextNode = remove->NextNode;
-//    }
-//}
-//
-//Node* GetNode(Node* head, int index)
-//{
-//    Node* current = head;
-//
-//    while (current != nullptr && (--index >= 0))
-//        current = current->NextNode;
-//
-//    return current;
-//}
-//
-//int GetNodeCount(Node* head)
-//{
-//    int count = 0;
-//    Node* current = head;
-//
-//    while (current != nullptr)
-//    {
-//        current = current->NextNode;
-//        count++;
-//    }
-//
-//    return count;
-//}
+void InsertHead(Node** current, Node* head)
+{
+    if (*current == nullptr)
+    {
+        *current = head;
+    }
+    else
+    {
+        head->NextNode = *current;
+        (*current)->PrevNode = head;
+        *current = head;
+    }
+}
+
+Node* GetNode(Node* head, int index)
+{
+    Node* current = head;
+
+    while (current != nullptr && (--index >= 0))
+        current = current->NextNode;
+
+    return current;
+}
+
+int GetNodeCount(Node* head)
+{
+    int count = 0;
+    Node* current = head;
+
+    while (current != nullptr)
+    {
+        current = current->NextNode;
+        count++;
+    }
+
+    return count;
+}
+
+void Remove(Node** head, Node* remove)
+{
+    if (*head == remove)
+    {
+        *head = remove->NextNode;
+
+        if (*head != nullptr)
+            (*head)->PrevNode = nullptr;
+
+        remove->PrevNode = nullptr;
+        remove->NextNode = nullptr;
+    }
+    else
+    {
+        Node* current = remove;
+
+        remove->PrevNode->NextNode = current->NextNode;
+        if (remove->NextNode != nullptr)
+            remove->NextNode->PrevNode = current->PrevNode;
+
+        remove->PrevNode = nullptr;
+        remove->NextNode = nullptr;
+    }
+}
+

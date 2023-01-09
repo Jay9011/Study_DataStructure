@@ -51,7 +51,7 @@ private:
 		Destroy(node->Left);
 		Destroy(node->Right);
 
-		Destroy(&node);
+		DestroyNode(&node);
 	}
 
 public:

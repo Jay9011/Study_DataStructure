@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <Windows.h>
+#include "Timer.h"
 
 struct Data
 {
@@ -94,29 +95,37 @@ int main()
     UINT count = 0;
     UINT target = 60000;
 
+    Timer timer;
+
     /*
     * SequenceSearch
     */
     {
+        timer.Start();
         Data* result = SequenceSearch(data, USHRT_MAX, target, &count);
+        timer.End();
     }
-    printf("순차 탐색 %d번 만에 찾음\n", count);
+    printf("순차 탐색 %d번 만에 찾음, 시간 : %f\n", count, timer.RunningTime());
 
     /*
     * BinarySearch
     */
     {
+        timer.Start();
         Data* result = BinarySearch(data, USHRT_MAX, target, &count);
+        timer.End();
     }
-    printf("이진 탐색 %d번 만에 찾음\n", count);
+    printf("이진 탐색 %d번 만에 찾음, 시간 : %f\n", count, timer.RunningTime());
 
     /*
     * STL BinarySearch
     */
     {
+        timer.Start();
         bsearch((void*)&target, (void*)data, USHRT_MAX, sizeof(Data), BinaryCompare);
+        timer.End();
     }
-    printf("이진 탐색 %d번 만에 찾음\n", BinaryCompareCount);
+    printf("이진 탐색 %d번 만에 찾음, 시간 : %f\n", BinaryCompareCount, timer.RunningTime());
 
     return 0;
 }

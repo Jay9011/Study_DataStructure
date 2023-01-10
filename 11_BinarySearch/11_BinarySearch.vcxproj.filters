@@ -4,4 +4,7 @@
     <ClCompile Include="Execute.cpp" />
     <ClCompile Include="File.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Timer.h" />
+  </ItemGroup>
 </Project>

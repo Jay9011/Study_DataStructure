@@ -67,10 +67,13 @@ Data* BinarySearch(Data* datas, UINT size, UINT target, OUT UINT* count)
     return nullptr;
 }
 
+int BinaryCompareCount = 0;
 int BinaryCompare(const void* val1, const void* val2)
 {
     Data* data1 = (Data*)val1;
     Data* data2 = (Data*)val2;
+
+    BinaryCompareCount++;
     
     if (data1->Index > data2->Index)
         return 1;
@@ -113,7 +116,7 @@ int main()
     {
         bsearch((void*)&target, (void*)data, USHRT_MAX, sizeof(Data), BinaryCompare);
     }
-    printf("이진 탐색 %d번 만에 찾음\n", count);
+    printf("이진 탐색 %d번 만에 찾음\n", BinaryCompareCount);
 
     return 0;
 }

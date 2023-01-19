@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <queue>
 using namespace std;
 
 template<typename T>
@@ -50,16 +51,50 @@ public:
     {
         cout << node->Data;
 
-        node->visited = true;
+        node->Visited = true;
         
         Edge* edge = node->Edge;
         while (edge != nullptr)
         {
-            if ((edge->Target != nullptr) && (edge->Target->visited == false))
+            if ((edge->Target != nullptr) && (edge->Target->Visited == false))
                 DFS(edge->Target);  // 함수 스택 콜
 
             edge = edge->Next;  // 다음 간선 탐색 (연결된 인접 노드가 존재하는지 확인)
         }
+    }
+
+    void BFS(Node* node)
+    {
+        Edge* edge = nullptr;
+
+        cout << node->Data;
+
+        node->Visited = true;
+        q.push(node);
+
+        while (q.empty() == false)
+        {
+            Node* poped = q.front();
+            q.pop();
+
+            node = poped;
+            edge = node->Edge;
+
+            while (edge != nullptr)
+            {
+                node = edge->Target;
+
+                if (node != nullptr && node->Visited == false)
+                {
+                    cout << node->Data;
+
+                    node->Visited = true;
+                    q.push(node);
+                }
+
+                edge = edge->Next;
+            }//while(edge)
+        }//while(q)
     }
 
     void Print()
@@ -119,7 +154,7 @@ public:
     {
         T Data = T();
         int Index = -1;
-        bool visited = false;
+        bool Visited = false;
 
         Node* Next = nullptr;   // 모든 정점 리스트들을 관리하기 위한 노드 리스트 (선형 리스트)
 
@@ -137,4 +172,6 @@ public:
 private:
     Node* head = nullptr;
     int count = 0;
+
+    queue<Node*> q;
 };

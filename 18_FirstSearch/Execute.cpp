@@ -40,6 +40,12 @@ int main()
     graph.Print();
 
     graph.DFS(n1);
+    cout << endl << endl;
+
+    n1->Visited = n2->Visited = n3->Visited = n4->Visited = n5->Visited = false;
+
+    graph.BFS(n1);
+    cout << endl << endl;
 
     return 0;
 }

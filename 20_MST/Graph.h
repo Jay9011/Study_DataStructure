@@ -5,6 +5,7 @@
 using namespace std;
 
 #include "PQueue.h"
+#include "DisjointSet.h"
 
 template<typename T>
 class Graph
@@ -59,7 +60,7 @@ public:
 
         int* weights = new int[count];
         Node** mstNodes = new Node * [count];
-        Node** friends = new Node * [count];
+        Node** connected = new Node * [count];
         Node** parents = new Node * [count];
 
 
@@ -72,7 +73,7 @@ public:
 
             weights[index] = INT_MAX;
             mstNodes[index] = newNode;
-            friends[index] = nullptr;
+            connected[index] = nullptr;
             parents[index] = nullptr;
             currentNode = currentNode->Next;
 
@@ -94,14 +95,14 @@ public:
             typename PQueue<Node*>::Node poped = queue.RemoveMin();
 
             currentNode = poped.Data;
-            friends[currentNode->Index] = currentNode;
+            connected[currentNode->Index] = currentNode;
 
             currentEdge = currentNode->Edge;
             while (currentEdge != nullptr)
             {
                 Node* targetNode = currentEdge->Target;
 
-                if (friends[targetNode->Index] == nullptr && currentEdge->Weight < weights[targetNode->Index])
+                if (connected[targetNode->Index] == nullptr && currentEdge->Weight < weights[targetNode->Index])
                 {
                     typename PQueue<Node*>::Node newNode = typename PQueue<Node*>::Node(currentEdge->Weight, targetNode);
                     queue.Insert(newNode);
@@ -138,8 +139,68 @@ public:
 
         delete[] weights;
         delete[] mstNodes;
-        delete[] friends;
+        delete[] connected;
         delete[] parents;
+    }
+
+    void Kruskal(Graph<T>* graph)
+    {
+        Node** mstNodes = new Node * [count];
+        PQueue<Edge*> queue(10);
+
+        typename DisjointSet<Node*>::Set** sets = new typename DisjointSet<Node*>::Set * [count];
+
+
+        int index = 0;
+        Node* currentNode = head;
+        Edge* currentEdge = nullptr;
+
+        while (currentNode != nullptr)
+        {
+            sets[index] = DisjointSet<Node*>::CreateSet(currentNode);
+            mstNodes[index] = CreateNode(currentNode->Data);
+            graph->AddNode(mstNodes[index]);
+
+            currentEdge = currentNode->Edge;
+            while (currentEdge != nullptr)
+            {
+                typename PQueue<Edge*>::Node newNode = typename PQueue<Edge*>::Node(currentEdge->Weight, currentEdge);
+                queue.Insert(newNode);
+
+                currentEdge = currentEdge->Next;
+            }//while(currentEdge)
+
+            currentNode = currentNode->Next;
+            index++;
+        }//while(currentNode)
+
+
+        while (queue.Empty() == false)
+        {
+            typename PQueue<Edge*>::Node poped = queue.RemoveMin();
+            currentEdge = poped.Data;
+
+
+            int start = currentEdge->Start->Index;
+            int target = currentEdge->Target->Index;
+
+            // Start의 최종 부모와 Target의 최종 부모가 같으면 같은 집합에 속해있으므로 연결하지 않습니다.
+            if (DisjointSet<Node*>::FindSet(sets[start]) == DisjointSet<Node*>::FindSet(sets[target]))
+                continue;
+
+            // 확인된 두 집합을 합집합으로 연결해줍니다.
+            DisjointSet<Node*>::UnionSet(sets[start], sets[target]);
+
+            graph->AddEdge(mstNodes[start], Graph<T>::CreateEdge(mstNodes[start], mstNodes[target], currentEdge->Weight));
+            graph->AddEdge(mstNodes[target], Graph<T>::CreateEdge(mstNodes[target], mstNodes[start], currentEdge->Weight));
+
+            cout << mstNodes[start]->Data << " -> " << mstNodes[target]->Data << ", " << currentEdge->Weight << endl;
+        }
+
+        cout << endl;
+
+        delete[] sets;
+        delete[] mstNodes;
     }
 
     void Print()

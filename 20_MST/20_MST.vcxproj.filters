@@ -6,5 +6,6 @@
   <ItemGroup>
     <ClInclude Include="Graph.h" />
     <ClInclude Include="PQueue.h" />
+    <ClInclude Include="DisjointSet.h" />
   </ItemGroup>
 </Project>

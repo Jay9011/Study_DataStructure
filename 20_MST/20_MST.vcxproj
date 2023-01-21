@@ -22,6 +22,7 @@
     <ClCompile Include="Execute.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DisjointSet.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="PQueue.h" />
   </ItemGroup>

@@ -4,7 +4,7 @@ typedef Graph<char> G;
 
 int main()
 {
-    G graph, mst;
+    G graph;
 
     G::Node* A = G::CreateNode('A');
     G::Node* B = G::CreateNode('B');
@@ -44,7 +44,19 @@ int main()
 
     graph.AddEdge(G, G::CreateEdge(G, I, 106));
 
-    graph.Prim(B, &mst);
+    cout << "프림 알고리즘" << endl;
+    Graph<char> prim;
+    graph.Prim(B, &prim);
+    prim.Print();
+
+    cout << endl << endl;
+
+    cout << "크루스칼 알고리즘" << endl;
+    Graph<char> kruskal;
+    graph.Kruskal(&kruskal);
+    kruskal.Print();
+
+    cout << endl << endl;
 
     return 0;
 }

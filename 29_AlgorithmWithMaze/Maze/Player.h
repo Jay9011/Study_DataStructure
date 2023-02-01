@@ -6,7 +6,7 @@ class Player
 {
 	enum
 	{
-		MOVE_TICK = 100	// 얼마나 시간이 지나면 움직일지 지정합니다.
+		MOVE_TICK = 500	// 얼마나 시간이 지나면 움직일지 지정합니다.
 	};
 
 public:

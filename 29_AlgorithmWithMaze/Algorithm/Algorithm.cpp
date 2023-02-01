@@ -1,80 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <stack>
+#include <queue>
 using namespace std;
-
-template<typename T>
-class Vector
-{
-public:
-	Vector() = default;
-	~Vector()
-	{
-		if (Data)
-			delete[] Data;
-	}
-
-	void push_back(const T& value)
-	{
-		// 예약 공간을 확인해 확장합니다.
-		if (Size == Capacity)
-		{
-			int newCapacity = static_cast<int>(Capacity * 1.5);
-			if (newCapacity == Capacity)
-				newCapacity++;	// 만약 새로운 공간 크기가 이전 공간의 크기와 같은 경우 (1*1.5=1)
-
-			reserve(newCapacity);
-		}
-
-		// 새로운 데이터를 저장
-		Data[Size] = value;
-
-		// 현재 사용중인 공간의 크기를 증가합니다.
-		Size++;
-	}
-
-	void reserve(int capacity)
-	{
-		if (Capacity >= capacity)
-			return;
-
-		Capacity = capacity;
-
-		T* newData = new T[Capacity];
-
-		// 기존 데이터를 복사합니다.
-		for (int i = 0; i < Size; i++)
-			newData[i] = Data[i];
-
-		if (Data)
-			delete[] Data;
-
-		// 새로운 공간을 가리킵니다.
-		Data = newData;
-	}
-
-	T& operator[](const int pos) { return Data[pos]; }
-
-	int size() { return Size; }
-	int capacity() { return Capacity; }
-
-	void clear()
-	{
-		if (Data)
-		{
-			delete[] Data;
-			Data = new T[Capacity];
-		}
-
-		Size = 0;
-	}
-
-private:
-	T* Data = nullptr;
-	int Size = 0;     // 사용중인 공간 크기
-	int Capacity = 0; // 예약 공간 크기
-};
-
 
 template<typename T>
 class Node
@@ -150,6 +79,78 @@ public:
 
 public:
 	Node<T>* node;
+};
+
+template<typename T>
+class Vector
+{
+public:
+	Vector() = default;
+	~Vector()
+	{
+		if (Data)
+			delete[] Data;
+	}
+
+	void push_back(const T& value)
+	{
+		// 예약 공간을 확인해 확장합니다.
+		if (Size == Capacity)
+		{
+			int newCapacity = static_cast<int>(Capacity * 1.5);
+			if (newCapacity == Capacity)
+				newCapacity++;	// 만약 새로운 공간 크기가 이전 공간의 크기와 같은 경우 (1*1.5=1)
+
+			reserve(newCapacity);
+		}
+
+		// 새로운 데이터를 저장
+		Data[Size] = value;
+
+		// 현재 사용중인 공간의 크기를 증가합니다.
+		Size++;
+	}
+
+	void reserve(int capacity)
+	{
+		if (Capacity >= capacity)
+			return;
+
+		Capacity = capacity;
+
+		T* newData = new T[Capacity];
+
+		// 기존 데이터를 복사합니다.
+		for (int i = 0; i < Size; i++)
+			newData[i] = Data[i];
+
+		if (Data)
+			delete[] Data;
+
+		// 새로운 공간을 가리킵니다.
+		Data = newData;
+	}
+
+	T& operator[](const int pos) { return Data[pos]; }
+
+	int size() { return Size; }
+	int capacity() { return Capacity; }
+
+	void clear()
+	{
+		if (Data)
+		{
+			delete[] Data;
+			Data = new T[Capacity];
+		}
+
+		Size = 0;
+	}
+
+private:
+	T* Data = nullptr;
+	int Size = 0;     // 사용중인 공간 크기
+	int Capacity = 0; // 예약 공간 크기
 };
 
 template<typename T>
@@ -253,10 +254,125 @@ private:
 	int Size;
 };
 
+template<typename T, typename _Container = vector<T>>
+class Stack
+{
+public:
+	void push(const T& value)
+	{
+		Container.push_back(value);
+	}
+
+	void pop()
+	{
+		Container.pop_back();
+	}
+
+	T& top()
+	{
+		return Container.back();
+	}
+
+	bool empty() { return Container.empty(); }
+	int size() { return Container.size(); }
+
+private:
+	//vector<T> Container;
+	//list<T> Container;
+	_Container Container;
+};
+
+template<typename T>
+class ListQueue
+{
+public:
+	void push(const T& value)
+	{
+		Container.push_back(value);
+	}
+
+	void pop()
+	{
+		Container.pop_front();
+	}
+
+	T& front()
+	{
+		return Container.front();
+	}
+
+	bool empty() { return Container.empty(); }
+	int size() { return Container.size(); }
+
+private:
+	list<T> Container;
+};
+
+template<typename T>
+class ArrayQueue
+{
+public:
+	void push(const T& value)
+	{
+		if (Size == Container.size())
+		{
+			// 큐가 가득 찼다면 크기를 늘립니다.
+			int newSize = max<int>(1, static_cast<int>(Size * 1.5));
+			if (newSize == Size)
+				newSize++;
+
+			vector<T> newData;
+			newData.resize(newSize);
+
+			// 새로운 배열에 데이터를 복사합니다.
+			for (int i = 0; i < Size; i++)
+			{
+				int index = (Front + i) % Container.size();
+				newData[i] = Container[index];
+			}
+
+			Container.swap(newData);
+			Front = 0;
+			Back = Size;
+		}
+
+		// 데이터의 삽입 위치(Back)에 데이터를 추가하고 1칸 증가시킵니다.
+		// 환형을 사용하기 위해 % 연산을 이용해 index 를 돌립니다.
+		Container[Back] = value;
+		Back = (Back + 1) % Container.size();
+		Size++;
+	}
+
+	void pop()
+	{
+		Front = (Front + 1) % Container.size();
+		Size--;
+	}
+
+	T& front()
+	{
+		return Container[Front];
+	}
+
+	bool empty() { return Size == 0; }
+	int size() { return Size; }
+
+private:
+	vector<T> Container;
+
+	int Front = 0;
+	int Back = 0;
+	int Size = 0;
+};
+
+
 int main()
 {
+	/*
+	* Vector
+	*/
 	//vector<int> v;
-	////Vector<int> v;
+	//Vector<int> v;
 
 	//v.reserve(100);
 	//cout << v.size() << " " << v.capacity() << endl;
@@ -273,30 +389,76 @@ int main()
 	//v.clear();
 	//cout << v.size() << " " << v.capacity() << endl;
 
+
+	/*
+	* List
+	*/
 	//list<int> li;
 
 	//list<int>::iterator eraseIt;
-	List<int> li;
+	//List<int> li;
 
-	List<int>::iterator eraseIt;
-	for (int i = 0; i < 10; i++)
+	//List<int>::iterator eraseIt;
+	//for (int i = 0; i < 10; i++)
+	//{
+	//	if (i == 5)
+	//	{
+	//		eraseIt = li.insert(li.end(), i);
+	//	}
+	//	else
+	//	{
+	//		li.push_back(i);
+	//	}
+	//}
+
+	//li.pop_back();
+
+	//li.erase(eraseIt);
+
+	//for (List<int>::iterator it = li.begin(); it != li.end(); it++)
+	//{
+	//	cout << (*it) << endl;
+	//}
+
+
+	/*
+	* Stack
+	*/
+	//stack<int> s;
+	//Stack<int> s;
+
+	//s.push(1);
+	//s.push(2);
+	//s.push(3);
+
+	//while (s.empty() == false)
+	//{
+	//	// 최상위 원소를 가져옵니다. (제거하지 않습니다.)
+	//	int data = s.top();
+	//	// 최상위 원소를 삭제합니다.
+	//	s.pop();
+
+	//	cout << data << endl;
+	//}
+
+	//int size = s.size();
+
+
+	/*
+	* Queue
+	*/
+	queue<int> q;
+	//ArrayQueue<int> q;
+
+	for (int i = 0; i < 100; i++)
+		q.push(i);
+
+	while (q.empty() == false)
 	{
-		if (i == 5)
-		{
-			eraseIt = li.insert(li.end(), i);
-		}
-		else
-		{
-			li.push_back(i);
-		}
+		int value = q.front();
+		q.pop();
+		cout << value << endl;
 	}
 
-	li.pop_back();
-
-	li.erase(eraseIt);
-
-	for (List<int>::iterator it = li.begin(); it != li.end(); it++)
-	{
-		cout << (*it) << endl;
-	}
+	int size = q.size();
 }

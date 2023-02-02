@@ -110,6 +110,7 @@ int main()
 	visited = vector<bool>(6, false); // 방문 초기화
 	//DFS(0);
 	//DFSAll();
+	BFS(0);
 #pragma endregion
 
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <vector>
+#include <queue>
 using namespace std;
 
 // DFS (Depth First Search) 깊이 우선 탐색
@@ -40,6 +41,9 @@ void CreateGraph()
 	};
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+* DFS (Depth First Search) 깊이 우선 탐색
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 void DFS(int here)
 {
 	// 방문한 노드에 체크합니다. (다시 방문하지 않게 예방합니다)
@@ -69,7 +73,6 @@ void DFS(int here)
 			DFS(there);
 	}
 }
-
 // 모든 정점에 대해 DFS를 수행합니다.
 void DFSAll()
 {
@@ -78,6 +81,53 @@ void DFSAll()
 	for (int i = 0; i < 6; i++)
 		if (visited[i] == false)
 			DFS(i);
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+* BFS (Breadth First Search) 너비 우선 탐색
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+void BFS(int here)
+{
+	// 누구에 의해 발견 되었는지?
+	vector<int> parent(6, -1);
+	// 시작점에서 얼만큼 떨어져 있는지?
+	vector<int> distance(6, -1);
+
+	queue<int> q;
+	q.push(here);
+	visited[here] = true;
+
+	parent[here] = here;
+	distance[here] = 0;
+
+	while (q.empty() == false)
+	{
+		here = q.front(); // 다음 방문할 정점을 가져옵니다.
+		q.pop();
+
+		printf("Visited : %d\n", here);
+
+		for (int there = 0; there < 6; there++)
+		{
+			if (adjacent[here][there] == 0)
+				continue;
+			if (visited[there]) // queue에 들어간 정점은 추가하지 않습니다.
+				continue;
+
+			q.push(there);
+			visited[there] = true;
+
+			parent[there] = here;
+			distance[there] = distance[here] + 1;
+		}
+	}
+}
+
+void BFSAll()
+{
+	for (int i = 0; i < 6; i++)
+		if (visited[i] == false)
+			BFS(i);
 }
 
 

@@ -1,7 +1,84 @@
 #pragma once
+#include <stdio.h>
 #include <vector>
-
 using namespace std;
+
+// DFS (Depth First Search) 깊이 우선 탐색
+// BFS (Breadth First Search) 너비 우선 탐색
+
+struct Vertex
+{
+};
+
+vector<Vertex> vertices;	  // 정점 목록
+vector<vector<int>> adjacent; // 인접 목록
+vector<bool> visited;
+
+void CreateGraph()
+{
+	vertices.resize(6);
+	adjacent = vector<vector<int>>(6);
+
+	// 각 정점에 대한 인접 리스트
+	//adjacent[0].push_back(1);
+	//adjacent[0].push_back(3);
+	//adjacent[1].push_back(0);
+	//adjacent[1].push_back(2);
+	//adjacent[1].push_back(3);
+	//adjacent[3].push_back(4);
+	//adjacent[5].push_back(4);
+
+	// 인접 행렬
+	adjacent = vector<vector<int>>
+	{
+		{ 0, 1, 0, 1, 0, 0},
+		{ 1, 0, 1, 1, 0, 0},
+		{ 0, 0, 0, 0, 0, 0},
+		{ 0, 0, 0, 0, 1, 0},
+		{ 0, 0, 0, 0, 0, 0},
+		{ 0, 0, 0, 0, 1, 0},
+	};
+}
+
+void DFS(int here)
+{
+	// 방문한 노드에 체크합니다. (다시 방문하지 않게 예방합니다)
+	visited[here] = true;
+	printf("Visited : %d\n", here);
+
+	// 인접 리스트 version
+	// 현재 정점의 인접 정점을 순회합니다.
+	//for (int i = 0; i < adjacent[here].size(); i++)
+	//{
+	//	// 현재 노드의 인접 리스트를 가져옵니다.
+	//	int there = adjacent[here][i];
+	//	// 방문하지 않은 인접 정점인 경우 '재귀 호출'을 실행합니다.
+	//	if (visited[there] == false)
+	//		DFS(there);
+	//}
+
+	// 인접 행렬 version
+	// 현재 정점과 모든 정점의 연결성을 순회 확인합니다.
+	for (int there = 0; there < 6; there++)
+	{
+		if (adjacent[here][there] == 0) // 갈 수 있는 인접 정점을 확인합니다.
+			continue;
+
+		// 아직 방문하지 않은 곳이 있으면 방문한다
+		if (visited[there] == false)
+			DFS(there);
+	}
+}
+
+// 모든 정점에 대해 DFS를 수행합니다.
+void DFSAll()
+{
+	visited = vector<bool>(6, false);
+
+	for (int i = 0; i < 6; i++)
+		if (visited[i] == false)
+			DFS(i);
+}
 
 
 void CreateGraph_1()

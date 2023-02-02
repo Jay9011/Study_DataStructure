@@ -4,6 +4,7 @@
 #include <stack>
 #include <queue>
 #include "Linear.h"
+#include "Graph.h"
 using namespace std;
 
 int main()
@@ -105,7 +106,10 @@ int main()
 	//int size = q.size();
 #pragma endregion
 #pragma region Graph
-	
+	CreateGraph();
+	visited = vector<bool>(6, false); // 방문 초기화
+	//DFS(0);
+	//DFSAll();
 #pragma endregion
 
 }

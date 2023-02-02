@@ -106,7 +106,7 @@ void CreateGraph_3()
 	// 0번 -> 3번 정점이 연결되어 있는지 확인합니다.
 	bool connected = adjacent[0][3];
 
-	// 가중치를 같은 좌표(index)로 관리할 수 있습니다.
+	// 간선을 true, false가 아니라 가중치로 표현할수도 있습니다. (-1은 연결 안됨을 표현합니다.)
 	vector<vector<int>> adjacent2 =
 	{
 		vector<int> { -1, 15, -1, 35, -1, -1 },

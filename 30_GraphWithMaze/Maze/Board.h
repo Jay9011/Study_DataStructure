@@ -28,6 +28,7 @@ public:
 	Pos GetEnterPos() { return Pos{ 1, 1 }; }
 	Pos GetExitPos()  { return Pos{ size - 2, size - 2 }; }
 
+	INT32 GetSize() { return size; }
 private:
 	TileType tile[BOARD_MAX_SIZE][BOARD_MAX_SIZE] = {};
 	INT32 size = 0;

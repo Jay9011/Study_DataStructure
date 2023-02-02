@@ -9,6 +9,32 @@ void Player::Init(Board* board)
 	this->pos = board->GetEnterPos();
 	this->board = board;
 
+	RightHand();
+}
+
+void Player::Update(UINT64 deltaTick)
+{
+	if (pathIndex >= path.size())
+		return;
+
+	sumTick += deltaTick;
+	if (sumTick >= MOVE_TICK)
+	{
+		sumTick = 0;
+
+		pos = path[pathIndex];
+		pathIndex++;
+	}
+}
+
+bool Player::CanGo(Pos pos)
+{
+	TileType tileType = board->GetTileType(pos);
+	return tileType == TileType::EMPTY;
+}
+
+void Player::RightHand()
+{
 	Pos pos = this->pos;
 
 	path.clear();
@@ -49,23 +75,6 @@ void Player::Init(Board* board)
 		{
 			// 왼쪽 방향으로 90도 회전합니다.
 			dir = (dir + 1) % DIR_COUNT;
-			/*
-			switch (dir)
-			{
-			case DIR_UP:
-				dir = DIR_LEFT;
-				break;
-			case DIR_LEFT:
-				dir = DIR_DOWN;
-				break;
-			case DIR_DOWN:
-				dir = DIR_RIGHT;
-				break;
-			case DIR_RIGHT:
-				dir = DIR_UP;
-				break;
-			}
-			*/
 		}//if(CanGo)
 
 	}//while(pos != dest)
@@ -102,23 +111,76 @@ void Player::Init(Board* board)
 	path = newPath;
 }
 
-void Player::Update(UINT64 deltaTick)
+void Player::BFS()
 {
-	if (pathIndex >= path.size())
-		return;
+	Pos pos = this->pos;
 
-	sumTick += deltaTick;
-	if (sumTick >= MOVE_TICK)
+	path.clear();
+	path.push_back(pos);
+
+	// 목적지에 도착하기 전에는 계속해서 실행되어야 합니다.
+	Pos dest = board->GetExitPos();
+
+	Pos front[4] =
 	{
-		sumTick = 0;
+		Pos { -1, 0 }, // UP
+		Pos {  0,-1 }, // LEFT
+		Pos {  1, 0 }, // DOWN
+		Pos {  0, 1 }, // RIGHT
+	};
 
-		pos = path[pathIndex];
-		pathIndex++;
+	const INT32 size = board->GetSize();
+	// 발견한 여부(큐에 넣었던 적이 있는지) 저장합니다.
+	vector<vector<bool>> discovered(size, vector<bool>(size, false));
+
+	// parent[A] = B; -> A는 B로 인해 발견함
+	map<Pos, Pos> parent;
+
+	// queue는 [y][x] 좌표로 저장합니다.
+	queue<Pos> q;
+	q.push(pos);
+	discovered[pos.y][pos.x] = true;
+	parent[pos] = pos;
+
+	while (q.empty() == false)
+	{
+		pos = q.front();
+		q.pop();
+
+		if (pos == dest) // 방문한 위치가 도착점이면 종료합니다.
+			break;
+
+		for (INT32 dir = 0; dir < 4; dir++)
+		{
+			// 전 방향으로 갈 수 있는지 확인합니다.
+			Pos nextPos = pos + front[dir];
+			if (CanGo(nextPos) == false)
+				continue;
+
+			// 이미 queue에 넣었던 길이면 생략합니다.
+			if (discovered[nextPos.y][nextPos.x])
+				continue;
+
+			// BFS 형태로 갈 수 있는 길을 queue에 넣습니다.
+			q.push(nextPos);
+			discovered[nextPos.y][nextPos.x] = true;
+			parent[nextPos] = pos;
+		}
 	}
-}
+	path.clear();
 
-bool Player::CanGo(Pos pos)
-{
-	TileType tileType = board->GetTileType(pos);
-	return tileType == TileType::EMPTY;
+	pos = dest; // 도착점부터 시작합니다.
+
+	while (true)
+	{
+		path.push_back(pos);
+
+		// 자신의 위치와 부모 위치가 같다면 시작점입니다.
+		if (pos == parent[pos])
+			break;
+
+		pos = parent[pos];
+	}
+
+	std::reverse(path.begin(), path.end());
 }

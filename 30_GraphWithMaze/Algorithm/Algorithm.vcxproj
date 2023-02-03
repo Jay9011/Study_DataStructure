@@ -130,6 +130,7 @@
     <ClCompile Include="Algorithm.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Dijkstra.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="Linear.h" />
   </ItemGroup>

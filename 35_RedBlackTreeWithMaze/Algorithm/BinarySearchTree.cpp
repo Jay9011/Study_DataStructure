@@ -26,6 +26,15 @@ void SetCursorColor(ConsoleColor color)
     SetConsoleTextAttribute(output, static_cast<SHORT>(color));
 }
 
+void ShowConsoleCursor(bool flag)
+{
+    HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO cursorInfo;
+    GetConsoleCursorInfo(output, &cursorInfo);
+    cursorInfo.bVisible = flag;
+    SetConsoleCursorInfo(output, &cursorInfo);
+}
+
 BinarySearchTree::BinarySearchTree()
 {
     nil = new Node(); // Black
@@ -35,6 +44,13 @@ BinarySearchTree::BinarySearchTree()
 BinarySearchTree::~BinarySearchTree()
 {
     delete nil;
+}
+
+void BinarySearchTree::Print()
+{
+    system("cls");
+    ShowConsoleCursor(false);
+    Print(root, 10, 0);
 }
 
 void BinarySearchTree::Print(Node* node, int x, int y)
@@ -223,15 +239,32 @@ void BinarySearchTree::Delete(int key)
     Delete(deleteNode);
 }
 
+// 먼저 BST 삭제를 실행합니다.
 void BinarySearchTree::Delete(Node* node)
 {
-    if (node == nullptr)
+    if (node == nil)
         return;
 
-    if (node->left == nullptr)
+    if (node->left == nil)
+    {
+        Color color = node->color;
+        Node* right = node->right;
         Replace(node, node->right);
-    else if (node->right == nullptr)
+
+        // 삭제한 노드의 컬러가 Black 인 경우 재검사를 실행합니다.
+        if (color == Color::Black)
+            DeleteFixup(right);
+    }
+    else if (node->right == nil)
+    {
+        Color color = node->color;
+        Node* right = node->left;
         Replace(node, node->left);
+
+        // 삭제한 노드의 컬러가 Black 인 경우 재검사를 실행합니다.
+        if (color == Color::Black)
+            DeleteFixup(right);
+    }
     else
     {
         Node* next = Next(node);
@@ -240,19 +273,157 @@ void BinarySearchTree::Delete(Node* node)
     }
 }
 
+// 먼저 BST 삭제 실행...
+// - Case1) 삭제할 노드가 Red -> 그냥 삭제! 끝!
+// - Case2) root가 DB -> 그냥 추가 Black 삭제! 끝!
+// - Case3) DB의 sibling 노드가 Red
+// -- s = black, p = red (s <-> p 색상 교환)
+// -- DB 방향으로 rotate(p) 
+// -- goto other case
+// - Case4) DB의 sibling 노드가 Black && sibling의 양쪽 자식도 Black
+// -- 추가 Black을 parent에게 이전
+// --- p가 Red이면 Black 됨.
+// --- p가 Black이면 DB 됨.
+// -- s = red
+// -- p를 대상으로 알고리즘 이어서 실행 (DB가 여전히 존재하면)
+// - Case5) DB의 sibling 노드가 Black && sibling의 near child = red, far child = black
+// -- s <-> near 색상 교환
+// -- far 방향으로 rotate(s)
+// -- goto case 6
+// - Case6) DB의 sibling 노드가 Black && sibling의 far child = red
+// - p <-> s 색상 교환
+// - far = black
+// - rotate(p) (DB 방향으로)
+// - 추가 Black 제거
+void BinarySearchTree::DeleteFixup(Node* node)
+{
+    Node* x = node;
+
+    // [Case1][Case2]
+    while (x != root && x->color == Color::Black)
+    {
+        // 삭제하려는 노드가 Parent 의 Left 에 있는 경우
+        if (x == x->parent->left)
+        {
+            // [Case3]
+            // Sibling 노드 정보를 가져옵니다.
+            Node* s = x->parent->right;
+
+            // Sibling 이 Red 인 경우
+            //      [p(B)]
+            // [x(DB)]  [s(R)]
+            if (s->color == Color::Red)
+            {
+                // Parent 를 Red 로 만들고 Sibling 을 Black으로 만들어 줍니다.
+                // (Sibling 이 Red 였다면 규칙에 의해 Parent 가 Black 이었을 것이기 때문에)
+                //      [p(R)]
+                // [x(DB)]  [s(B)]
+                //         [1]
+                s->color = Color::Black;
+                x->parent->color = Color::Red;
+
+                // Left 회전을 통해
+                //			[s(B)]
+                //      [p(R)]
+                // [x(DB)]  [1] 
+                LeftRotate(x->parent);
+
+                s = x->parent->right; // [1] 로 Sibling 교체
+            }
+
+            // [Case4]
+            if (s->left->color == Color::Black && s->right->color == Color::Black)
+            {
+                s->color = Color::Red;
+                x = x->parent;
+            }
+            // Sibling 의 자식 중 하나라도 Red 인 경우
+            else
+            {
+                // [Case5]
+                // Sibling 의 한 쪽 자식이 Red 라면 Black 의 개수가 맞지 않아
+                // 균형이 유지되지 않고 있을 수 있다는 것이므로
+                //          [p]
+                // [x(DB)]       [s(B)]
+                //         [near(R)][far(B)]
+                if (s->right->color == Color::Black)
+                {
+                    //         [p]
+                    // [x(DB)]    [near(B)]
+                    //				  [s(R)]
+                    //					 [far(B)]
+                    s->left->color = Color::Black; // 균형을 바꾸기 위해 자식을 Black 으로 바꾸고
+                    s->color = Color::Red; // 자신을 Red 로 바꾼 다음에
+
+                    RightRotate(s); // Right 회전을 통해 균형을 바꿉니다.
+
+                    s = x->parent->right; // [near] 로 Sibling 교체
+                }
+
+                // [Case6]
+                s->color = x->parent->color;
+                x->parent->color = Color::Black;
+                s->right->color = Color::Black;
+                LeftRotate(x->parent);
+                x = root;
+            }
+        }
+        // 삭제하려는 노드가 Parent 의 Right 에 있는 경우
+        else
+        {
+            // [Case3]
+            Node* s = x->parent->left;
+            if (s->color == Color::Red)
+            {
+                s->color = Color::Black;
+                x->parent->color = Color::Red;
+                RightRotate(x->parent);
+                s = x->parent->left; // [1]
+            }
+
+            // [Case4]
+            if (s->right->color == Color::Black && s->left->color == Color::Black)
+            {
+                s->color = Color::Red;
+                x = x->parent;
+            }
+            else
+            {
+                // [Case5]
+                if (s->left->color == Color::Black)
+                {
+                    s->right->color = Color::Black;
+                    s->color = Color::Red;
+                    LeftRotate(s);
+                    s = x->parent->left;
+                }
+
+                // [Case6]
+                s->color = x->parent->color;
+                x->parent->color = Color::Black;
+                s->left->color = Color::Black;
+                RightRotate(x->parent);
+                x = root;
+            }
+        }//end if(node->parent->left|right)
+    }
+
+    // 최종적으로 Black 이 됩니다.
+    x->color = Color::Black;
+}
+
 // u 서브 트리를 v 서브 트리로 교체합니다.
 // 그리고 delete u
 void BinarySearchTree::Replace(Node* u, Node* v)
 {
-    if (u->parent == nullptr)
+    if (u->parent == nil)
         root = v;
     else if (u == u->parent->left)
         u->parent->left = v;
     else
         u->parent->right = v;
 
-    if (v)
-        v->parent = u->parent;
+    v->parent = u->parent;
 
     delete u;
 }

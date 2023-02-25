@@ -12,11 +12,23 @@ using namespace std;
 
 int main()
 {
-	vector<int> v{1, 5, 3, 4, 2};
+	vector<int> v;
 
-	BubbleSort(v);
-	SelectionSort(v);
-	InsertionSort(v);
+	srand(time(0));
+
+	for(int i = 0; i < 50; i++)
+	{
+		int randValue = rand() % 100;
+		v.push_back(randValue);
+	}
+
+	// BubbleSort(v);
+	// SelectionSort(v);
+	// InsertionSort(v);
+	// HeapSort(v);
+	// MergeSort(v, 0, v.size() - 1);
+	QuickSort(v, 0, v.size() - 1);
+
 
 	for (const int num : v)
 	{

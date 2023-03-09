@@ -27,6 +27,9 @@
     <ClCompile Include="ConsoleHelper.cpp">
       <Filter>Helper</Filter>
     </ClCompile>
+    <ClCompile Include="DisjointSet.cpp">
+      <Filter>Board</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -43,6 +46,9 @@
     </ClInclude>
     <ClInclude Include="ConsoleHelper.h">
       <Filter>Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="DisjointSet.h">
+      <Filter>Board</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

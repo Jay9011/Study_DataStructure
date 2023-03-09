@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Board.h"
 #include "ConsoleHelper.h"
+#include "DisjointSet.h"
 #include "Player.h"
 
 const char* TILE = "■";
@@ -41,8 +42,7 @@ void Board::Render()
 	}
 }
 
-// Binary Tree 미로 생성 알고리즘
-// - Mazes For Programmers
+// Kruskal's 미로 생성 알고리즘
 void Board::GenerateMap()
 {
 	for (INT32 y = 0; y < size; y++)
@@ -56,41 +56,53 @@ void Board::GenerateMap()
 		}
 	}
 
-	// 랜덤으로 우측 혹은 아래로 길을 뚫는 작업
+	vector<CostEdge> edges;
+
+	// edges 후보를 랜덤 cost로 등록합니다.
 	for (INT32 y = 0; y < size; y++)
 	{
 		for (INT32 x = 0; x < size; x++)
 		{
-			// 이미 벽인 경우 생략
-			if (x % 2 == 0 || y % 2 == 0)
+			if(x % 2 == 0 || y % 2 == 0)
 				continue;
 
-			// 가장 우측이나 가장 아래쪽은 벽이여야 하므로 다른 방향으로 뚫어줍니다.
-			if (y == size - 2 && x == size - 2)
-				continue;
-			if (y == size - 2)
+			// 우측으로 연결하는 간선 후보를 만듭니다.
+			if (x < size - 2)
 			{
-				tile[y][x + 1] = TileType::EMPTY;
-				continue;
-			}
-			if (x == size - 2)
-			{
-				tile[y + 1][x] = TileType::EMPTY;
-				continue;
+				const INT32 randValue = rand() % 100;
+				edges.push_back(CostEdge{ randValue, Pos{y, x}, Pos{y, x + 2} });
 			}
 
-			// 랜덤으로 우측이나 아래를 뚫어 줍니다.
-			const INT32 randValue = rand() % 2;
-			if (randValue == 0)
+			// 아래로 연결하는 간선 후보를 만듭니다.
+			if (y < size - 2)
 			{
-				tile[y][x + 1] = TileType::EMPTY;
-			}
-			else
-			{
-				tile[y + 1][x] = TileType::EMPTY;
+				const INT32 randValue = rand() % 100;
+				edges.push_back(CostEdge{ randValue, Pos{y, x}, Pos{y + 2, x} });
 			}
 		}
 	}
+
+	sort(edges.begin(), edges.end());
+
+	DisjointSet sets(size * size);
+
+	for (CostEdge& edge : edges)
+	{
+		int u = edge.u.y * size + edge.u.x;
+		int v = edge.v.y * size + edge.v.x;
+
+		// 같은 그룹이면 Union 을 하지 않습니다. (사이클 방지)
+		if (sets.Find(u) == sets.Find(v))
+			continue;
+
+		// 두 그룹을 Union 합니다.
+		sets.Merge(u, v);
+		
+		int y = (edge.u.y + edge.v.y) / 2;
+		int x = (edge.u.x + edge.v.x) / 2;
+		tile[y][x] = TileType::EMPTY;
+	}
+
 }
 
 TileType Board::GetTileType(Pos pos)
